@@ -1,0 +1,26 @@
+token_user_search: sub
+check_scope: true
+cors:
+  enabled: true
+  allow_origin:
+    - "*"
+  methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  headers:
+    - "Accept"
+    - "Content-Type"
+    - "Authorization"
+    - "X-Requested-With"
+  max_age: 86400
+plugins:
+  test:
+    uri: sqlite://./test.db
+    enable_cache: true
+    cache_name: test_cache
+  test_cache:
+    uri: redis://localhost:6379
+    path: ./easyrest-plugin-redis

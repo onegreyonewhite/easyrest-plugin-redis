@@ -1,0 +1,6 @@
+.history
+release/*
+easyrest-plugin-redis
+coverage.out
+cover.out
+test.db*
