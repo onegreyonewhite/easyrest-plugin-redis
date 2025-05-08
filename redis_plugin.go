@@ -5,7 +5,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 )
 
 // Version can be set during build time
-var Version = "v0.1.0"
+var Version = "v0.2.0"
 
 // redisCachePlugin implements the CachePlugin interface using Redis.
 type redisCachePlugin struct {
@@ -23,10 +22,9 @@ type redisCachePlugin struct {
 }
 
 // InitConnection establishes a connection to the Redis server based on the URI.
-// Supports URI parameters like: db, password, dialTimeout, readTimeout, writeTimeout, poolSize, minIdleConns, idleTimeout.
 func (p *redisCachePlugin) InitConnection(uri string) error {
-	if !strings.HasPrefix(uri, "redis://") {
-		return errors.New("invalid Redis URI: must start with redis://")
+	if !strings.HasPrefix(uri, "redis://") && !strings.HasPrefix(uri, "rediss://") {
+		return errors.New("invalid Redis URI: must start with redis:// or rediss://")
 	}
 
 	// Use redis.ParseURL which handles standard Redis URIs correctly.
@@ -34,62 +32,6 @@ func (p *redisCachePlugin) InitConnection(uri string) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse Redis URI: %w", err)
 	}
-
-	// Extract custom parameters (if any) that redis.ParseURL might not handle directly
-	// or allow overriding standard ones if needed.
-	parsedURI, err := url.Parse(uri)
-	if err != nil {
-		return fmt.Errorf("failed to re-parse URI for custom params: %w", err) // Should not happen if redis.ParseURL succeeded
-	}
-	queryParams := parsedURI.Query()
-
-	// Example: Allow overriding timeouts via query params (redis.ParseURL might already set some)
-	if val := queryParams.Get("dialTimeout"); val != "" {
-		if d, err := time.ParseDuration(val); err == nil {
-			opts.DialTimeout = d
-		} else {
-			return fmt.Errorf("invalid dialTimeout value: %s", val)
-		}
-	}
-	if val := queryParams.Get("readTimeout"); val != "" {
-		if d, err := time.ParseDuration(val); err == nil {
-			opts.ReadTimeout = d
-		} else {
-			return fmt.Errorf("invalid readTimeout value: %s", val)
-		}
-	}
-	if val := queryParams.Get("writeTimeout"); val != "" {
-		if d, err := time.ParseDuration(val); err == nil {
-			opts.WriteTimeout = d
-		} else {
-			return fmt.Errorf("invalid writeTimeout value: %s", val)
-		}
-	}
-	/* Pool options removed for v9
-	if val := queryParams.Get("poolSize"); val != "" {
-		if i, err := strconv.Atoi(val); err == nil && i > 0 {
-			opts.PoolSize = i
-		} else {
-			return fmt.Errorf("invalid poolSize value: %s", val)
-		}
-	}
-	if val := queryParams.Get("minIdleConns"); val != "" {
-		if i, err := strconv.Atoi(val); err == nil && i >= 0 {
-			opts.MinIdleConns = i
-		} else {
-			return fmt.Errorf("invalid minIdleConns value: %s", val)
-		}
-	}
-	if val := queryParams.Get("idleTimeout"); val != "" {
-		if d, err := time.ParseDuration(val); err == nil {
-			opts.IdleTimeout = d // This field is removed in v9
-		} else {
-			return fmt.Errorf("invalid idleTimeout value: %s", val)
-		}
-	}
-	*/
-	// Note: The 'db' parameter is typically handled by the path in the URI for redis.ParseURL (e.g., redis://host:port/1)
-	// If provided as a query parameter (e.g., ?db=1), redis.ParseURL should handle it. If not, add logic here.
 
 	p.client = redis.NewClient(opts)
 

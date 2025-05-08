@@ -40,12 +40,23 @@ The plugin configuration is managed via the Redis connection URI. It uses `redis
   - Host and Port: `host:port`
   - Database Number: `/db_number` (e.g., `/0`, `/1`)
 - **Query Parameters (Optional Overrides/Additions):**
-  - `dialTimeout`: Timeout for establishing new connections (e.g., `5s`, `100ms`).
-  - `readTimeout`: Timeout for reading PING or commands (e.g., `3s`).
-  - `writeTimeout`: Timeout for writing commands (e.g., `3s`).
-  - `poolSize`: Maximum number of socket connections (default determined by `go-redis`).
-  - `minIdleConns`: Minimum number of idle connections (helps performance under load).
-  - `idleTimeout`: Amount of time after which idle connections are closed (e.g., `5m`).
+  - `protocol`: Protocol version to use (2 or 3). Default is 3.
+  - `client_name`: Name for the Redis client connection.
+  - `max_retries`: Maximum number of retries before giving up (default: 3, -1 disables retries).
+  - `min_retry_backoff`: Minimum backoff between each retry (e.g., `8ms`, -1 disables backoff).
+  - `max_retry_backoff`: Maximum backoff between each retry (e.g., `512ms`, -1 disables backoff).
+  - `dial_timeout`: Timeout for establishing new connections (e.g., `5s`, `100ms`).
+  - `read_timeout`: Timeout for reading commands (e.g., `3s`).
+  - `write_timeout`: Timeout for writing commands (e.g., `3s`).
+  - `pool_fifo`: Use FIFO mode for connection pool (true/false).
+  - `pool_size`: Maximum number of socket connections.
+  - `pool_timeout`: Timeout for getting a connection from the pool.
+  - `min_idle_conns`: Minimum number of idle connections.
+  - `max_idle_conns`: Maximum number of idle connections.
+  - `max_active_conns`: Maximum number of active connections.
+  - `conn_max_idle_time` / `idle_timeout`: Maximum amount of time a connection may be idle (deprecated: `idle_timeout`).
+  - `conn_max_lifetime` / `max_conn_age`: Maximum amount of time a connection may be reused (deprecated: `max_conn_age`).
+  - `skip_verify`: If true, disables TLS certificate verification (for `rediss://`).
 
 **Example URI with parameters:**
 
